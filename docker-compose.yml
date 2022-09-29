@@ -15,18 +15,26 @@ services:
     env_file:
       - .env
     networks:
-      - cdac_tracking
+      - common
+    depends_on:
+      - redis
+    environment:
+      REDIS_HOST: ${REDIS_HOST} # we'll use mentioned redis host
+      REDIS_PORT: 6379
   redis:
     image: redis:5.0.7-buster
+    hostname: ${REDIS_HOST}
     container_name: cdac_tracking-redis
     restart: unless-stopped
     ports:
       - ${REDIS_PORT}:6379
     networks:
-      - cdac_tracking
+      - common
     volumes:
-    - redis-db:/var/lib/redis
+      - redis-db:/data
 networks:
-  cdac_tracking:
+  common:
+    name: cdac_tracking_network
+    driver: bridge
 volumes:
   redis-db:
