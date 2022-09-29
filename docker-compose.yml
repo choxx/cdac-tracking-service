@@ -19,8 +19,7 @@ services:
     depends_on:
       - redis
     environment:
-      REDIS_HOST: ${REDIS_HOST} # we'll use mentioned redis host
-      REDIS_PORT: 6379
+      REDIS_PORT: 6379  # we'll use internal port
   redis:
     image: redis:5.0.7-buster
     hostname: ${REDIS_HOST}
@@ -32,9 +31,41 @@ services:
       - common
     volumes:
       - redis-db:/data
+  psql:
+    ports:
+      - ${POSTGRES_PORT}:5432
+    image: postgres:latest
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    container_name: cdac_tracking-hasura_psql
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - common
+
+  graphql-engine:
+    hostname: ${HASURA_HOST}
+    image: hasura/graphql-engine:v2.10.0
+    ports:
+      - ${HASURA_PORT}:${HASURA_PORT}
+    depends_on:
+      - psql
+    restart: always
+    container_name: cdac_tracking-hasura_graphql_engine
+    networks:
+      - common
+    environment:
+      - HASURA_GRAPHQL_DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@cdac_tracking-hasura_psql:5432/${POSTGRES_DB}
+      - HASURA_GRAPHQL_ENABLE_CONSOLE=true # set to "false" to disable console
+      - HASURA_GRAPHQL_ENABLED_LOG_TYPES=startup
+      - HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_ADMIN_SECRET}
+      - HASURA_GRAPHQL_SERVER_PORT=${HASURA_PORT}
 networks:
   common:
     name: cdac_tracking_network
     driver: bridge
 volumes:
   redis-db:
+  postgres-db:
