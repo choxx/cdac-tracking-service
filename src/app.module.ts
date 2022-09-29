@@ -17,8 +17,8 @@ import { TrackingQueueProcessor } from "./tracking-queue-processor";
     }),
     BullModule.forRoot({
       redis: {
-        host: 'localhost',  // todo
-        port: 6379, // todo
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT),
       },
       limiter: {
         max: 10,  // we can register here for global rate limiter
