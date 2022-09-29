@@ -36,3 +36,5 @@ lerna-debug.log*
 
 # Secret files
 .env
+hasura/.env
+hasura/config.yaml
