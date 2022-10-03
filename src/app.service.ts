@@ -23,7 +23,7 @@ export class AppService {
     @InjectQueue(QUEUES.CDAC_TRACKING) private queue: Queue
   ) {
     this.hasuraGraphqlUrl = configService.get<string>('HASURA_GRAPHQL_URL');
-    this.hasuraGraphqlSecret = configService.get<string>('HASURA_ADMIN_SECRET');
+    this.hasuraGraphqlSecret = configService.get<string>('HASURA_GRAPHQL_ADMIN_SECRET');
     this.cdacUsername = configService.get<string>('CDAC_USERNAME');
     this.cdacPassword = configService.get<string>('CDAC_PASSWORD');
     this.cdacTrackingUrl = configService.get<string>('CDAC_TRACKING_URL');
@@ -73,6 +73,7 @@ export class AppService {
     };
 
     const response = await this.hasuraGraphQLCall(data);
+    console.log(response);
     if (response?.data?.insert_cdac_tracking_one) {
       await this.queue.add(JOBS.CDAC_TRACKING_JOB, response.data.insert_cdac_tracking_one, {
         /*timeout: 30000,
